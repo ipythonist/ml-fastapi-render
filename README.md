@@ -23,7 +23,8 @@ block. The model is saved as `model.pkl` and served by FastAPI.
 ├── Dockerfile          # python:3.11-slim image, honours Render's $PORT
 ├── render.yaml         # Render Blueprint (docker runtime, free plan, /health check)
 ├── tests/test_api.py   # pytest suite against the app in-process
-└── test_live.py        # smoke test against a running URL (local or Render)
+├── test_live.py        # tests every endpoint of a running URL, pass/fail summary
+└── test_api.sh         # same walkthrough with plain curl
 ```
 
 ## 1. Model
@@ -100,8 +101,12 @@ The free instance sleeps after 15 min idle; the first request can take ~1 min.
 `GET /metrics` returns live counters (requests, errors, predictions, average
 latency, average predicted price) for a quick health overview.
 
-Smoke-test the deployed API and capture output for the submission:
+## Testing without the browser
+
+Both scripts default to `http://localhost:8000`; pass a URL to test Render.
 
 ```bash
+python test_live.py                                   # 19 checks over /, /health, /predict, /metrics, /docs
 python test_live.py https://<your-service>.onrender.com
+./test_api.sh                                         # curl version, prints raw responses
 ```
