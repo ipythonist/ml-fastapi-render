@@ -46,3 +46,9 @@ def test_metrics_counts_predictions():
     client.post("/predict", json=RICH_BLOCK)
     after = client.get("/metrics").json()["predictions_total"]
     assert after == before + 1
+
+
+def test_dashboard_served():
+    r = client.get("/dashboard")
+    assert r.status_code == 200
+    assert "Run all tests" in r.text

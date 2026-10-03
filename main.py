@@ -16,6 +16,7 @@ Endpoints:
     GET  /health   liveness check (Render pings this)
     POST /predict  predict the median house value for one census block
     GET  /metrics  in-process request counters for monitoring
+    GET  /dashboard browser UI: run the endpoint tests, watch metrics, try predictions
 
 Every request is written as one JSON line to stdout. Render captures stdout,
 so these lines show up in the service's Logs tab.
@@ -30,6 +31,7 @@ from threading import Lock
 import joblib
 import numpy as np
 from fastapi import FastAPI, HTTPException, Request
+from fastapi.responses import FileResponse
 from pydantic import BaseModel, Field
 
 # ---------- logging ----------
@@ -49,6 +51,7 @@ def log_event(level: str, event: str, **fields) -> None:
 
 # ---------- model ----------
 MODEL_PATH = os.path.join(os.path.dirname(__file__), "model.pkl")
+DASHBOARD_PATH = os.path.join(os.path.dirname(__file__), "static", "dashboard.html")
 
 try:
     artifact = joblib.load(MODEL_PATH)
@@ -128,7 +131,7 @@ def root():
         "message": "California House Price API is running. See /docs for usage.",
         "model": "HistGradientBoostingRegressor (California housing)",
         "model_info": MODEL_INFO,
-        "endpoints": ["/health", "/predict", "/metrics", "/docs"],
+        "endpoints": ["/health", "/predict", "/metrics", "/dashboard", "/docs"],
     }
 
 
@@ -159,6 +162,12 @@ def predict(features: HouseFeatures):
         METRICS["predicted_price_usd_sum"] += price_usd
     log_event("INFO", "prediction", input=features.model_dump(), predicted_price_usd=price_usd)
     return PredictionResponse(predicted_price_usd=price_usd, predicted_value_100k=round(value_100k, 4))
+
+
+@app.get("/dashboard", include_in_schema=False)
+def dashboard():
+    """Static single-page UI. It calls this same origin, so no CORS setup is needed."""
+    return FileResponse(DASHBOARD_PATH, media_type="text/html")
 
 
 @app.get("/metrics")

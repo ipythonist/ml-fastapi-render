@@ -10,6 +10,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy application code + trained model
 COPY main.py .
 COPY model.pkl .
+COPY static ./static
 
 # Render injects PORT at runtime; 8000 is the local default
 ENV PORT=8000

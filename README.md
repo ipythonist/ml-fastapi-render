@@ -18,7 +18,8 @@ block. The model is saved as `model.pkl` and served by FastAPI.
 .
 ├── train.py            # trains the model, writes model.pkl
 ├── model.pkl           # trained artifact (committed on purpose: Render needs it)
-├── main.py             # FastAPI app: /, /health, /predict, /metrics + JSON logging
+├── main.py             # FastAPI app: /, /health, /predict, /metrics, /dashboard + JSON logging
+├── static/dashboard.html # browser UI: run the tests, live metrics, try a prediction
 ├── requirements.txt    # pinned runtime deps (same sklearn version trains & serves)
 ├── Dockerfile          # python:3.11-slim image, honours Render's $PORT
 ├── render.yaml         # Render Blueprint (docker runtime, free plan, /health check)
@@ -58,6 +59,7 @@ Run the tests: `pytest -q tests`
 | `GET /health` | Liveness check (Render pings this) |
 | `POST /predict` | Predict price for one block (8 numeric fields, validated) |
 | `GET /metrics` | Request / error / prediction counters and average latency |
+| `GET /dashboard` | Browser UI: one-click test run, live metric cards, prediction form, request log |
 | `GET /docs` | Interactive Swagger UI |
 
 ## 3. Docker
@@ -101,7 +103,14 @@ The free instance sleeps after 15 min idle; the first request can take ~1 min.
 `GET /metrics` returns live counters (requests, errors, predictions, average
 latency, average predicted price) for a quick health overview.
 
-## Testing without the browser
+## Dashboard UI
+
+Open `http://localhost:8000/dashboard` (or the same path on Render). Click **Run all
+tests** to execute the full endpoint suite from the browser and see a pass/fail table
+with latencies. The metric cards read `/metrics`, with optional 5-second auto-refresh,
+and the form lets you try a prediction without curl.
+
+## Testing from the terminal
 
 Both scripts default to `http://localhost:8000`; pass a URL to test Render.
 

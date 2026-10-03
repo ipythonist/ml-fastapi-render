@@ -97,6 +97,9 @@ r = requests.get(f"{BASE}/openapi.json", timeout=TIMEOUT)
 paths = list(r.json().get("paths", {}).keys()) if r.status_code == 200 else []
 check("/openapi.json lists all routes", {"/", "/health", "/predict", "/metrics"} <= set(paths), str(paths))
 
+r = requests.get(f"{BASE}/dashboard", timeout=TIMEOUT)
+check("/dashboard serves the UI", r.status_code == 200 and "Run all tests" in r.text)
+
 # Summary
 passed, total = sum(results), len(results)
 print(f"\n{'ALL PASSED' if passed == total else 'SOME FAILED'}: {passed}/{total} checks")
