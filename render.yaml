@@ -1,0 +1,13 @@
+# Render Blueprint (https://render.com/docs/blueprint-spec)
+# Dashboard: New + -> Blueprint -> select this repo -> Apply
+services:
+  - type: web
+    name: california-house-price-api
+    runtime: docker
+    plan: free
+    region: singapore
+    healthCheckPath: /health
+    autoDeploy: true
+    envVars:
+      - key: LOG_LEVEL
+        value: INFO
